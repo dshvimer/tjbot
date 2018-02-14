@@ -34,6 +34,4 @@ function onRecvText(text) {
 function onRecvIntent(data) {
     console.log(data.entities.intent)
     console.log(data.entities.intent[0].value)
-    // if (data.entities.intent == 'introduction') {
-    // }
 }
