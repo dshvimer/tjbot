@@ -6,7 +6,7 @@ var configuration = {
 			level: 'info'
 		},
     robot: {
-            gender: 'female'
+            gender: 'male'
         },
     listen: {
             language: 'en-US'
@@ -14,7 +14,7 @@ var configuration = {
 
 	speak: {
 		language: 'en-US',
-		voice: undefined,
+		voice: "en-US_MichaelVoice",
 		speakerDeviceId: "plughw:0,0"
 	},
 };
