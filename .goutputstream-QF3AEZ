@@ -18,7 +18,7 @@ var configuration = {
         },
 
 	speak: {
-		language: 'en-US',
+		language: 'es-ES',
 		voice: undefined,
 		speakerDeviceId: "plughw:0,1"
 	},
@@ -44,8 +44,7 @@ var tj = new TJBot(hardware, configuration, credentials);
 //tj.shine('red');
 
 //tj.listen(onRecvText)
-//tj.speak("sup")
-tj.play('/usr/share/sounds/alsa/Front_Center.wav')
+tj.speak("hola que tal como est ustedes")
 //tj.takePhoto().then(function(filePath) {
     //console.log(filePath)
  //});
