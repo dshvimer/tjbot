@@ -6,7 +6,9 @@ const wit = new Wit({
   accessToken: "HABEOQ455XRJDBJ3NJKZHGPIAQY3QZKU"
 });
 
-tj.listen(onRecvText)
+jokeSpider()
+
+// tj.listen(onRecvText)
 //console.log(tj.shineColors())
 
 function onRecvText(text) {
@@ -105,4 +107,6 @@ let faceIds = res.data.map(item => item.faceId)
 			});
 }
 
-		
+function jokeSpider() {
+    tj.speak('Two spiders got engaged').then(() => tj.speak('I heard they met on the web'))
+}
