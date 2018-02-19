@@ -7,28 +7,56 @@ const wit = new Wit({
 });
 
 tj.listen(onRecvText)
-
+console.log(tj.shineColors())
 
 function onRecvText(text) {
-	tj.shine('blue');
+	tj.pulse('white' , 0.7);
     wit.message(text).then(onRecvIntent).catch((err) => err)
 	
 }
 
 function onRecvIntent(data) {
-	tj.shine('white')
+	
+	console.log('entities', data.entities)
     let intents = data.entities.intent 
-    console.log('intents', intents)
     if (intents.length >= 1) {
 		let intent = intents[0]
 		if (intent.value == 'introduction') {
-			attemptToIdentify(data.entities)
+			//handleIntroduction(data.entities)
+			tj.pulse('plum' , 0.7);
 		}
 			
 	}
 }
 
-function attemptToIdentify(entities) {
+function handleIntroduction(entities) {
+	if (entities.contact) {
+		let name = entities.contact[0].value
+		saveFriend(name)
+	}
+	else {
+		attemptToIdentify()
+	}
+}
+
+function saveFriend(name) {
+	console.log('otto is remembering your friend... allo')
+	tj.takePhoto().then(filePath => {
+		
+		faceRec.createSnapshot('./taylor.jpg')
+			.then(res => {
+				let photo = res.url
+				faceRec.createPerson(name, photo)
+					.then(res => {
+						console.log(res)
+					})
+					.catch(err => console.log(err))
+			})
+			.catch(err => console.log(err))
+	})
+}
+
+function attemptToIdentify() {
 	console.log('identify')
 	tj.takePhoto().then(filePath => {
 		console.log('took photo')
@@ -48,6 +76,7 @@ let faceIds = res.data.map(item => item.faceId)
                 faceRec.identify(identify)
                     .then(res => {
                         let c = res.data.reduce((acc, item) => acc.concat(item.candidates), [])
+                        console.log(c)
                         if (c.length >= 1)
                             faceRec.getPerson(c[0].personId)
                                 .then(res => tj.speak(res.data.name))

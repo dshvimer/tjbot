@@ -15,8 +15,8 @@ let faceRec = require('./face-rec')
 //     })
 //     .catch(err => console.log(err))
 //
-// faceRec.listPersonsForGroup('friends')
-//     .then(res => console.log(res.data))
+faceRec.listPersonsForGroup('friends')
+    .then(res => console.log(res.data))
 // faceRec.deletePerson('52dcef51-8a92-4aa6-a493-fc71914ca6e8')
 // faceRec.trainPersonGroup()
 //     .then(res => console.log(res.data))
@@ -24,6 +24,7 @@ let faceRec = require('./face-rec')
 // faceRec.getTrainingStatus()
 //     .then(res => console.log(res.data))
 //     .catch(err => console.log(err))
+/*
 faceRec.createSnapshot('./taylor-test.jpg')
     .then(res => {
         let photo = res.url
@@ -49,3 +50,4 @@ faceRec.createSnapshot('./taylor-test.jpg')
             .catch(err => console.log(err))
     })
     .catch(err => console.log(err))
+*/
