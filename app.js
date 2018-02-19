@@ -3,7 +3,7 @@ const Wit = require('node-wit').Wit
 const faceRec = require('./face-rec')
 const tj = require('./tj')
 const wit = new Wit({
-  accessToken: "6ZYUNU4AHWYHF46QOLDEB5ZYGPCHCWOA"
+  accessToken: "HABEOQ455XRJDBJ3NJKZHGPIAQY3QZKU"
 });
 
 tj.listen(onRecvText)
