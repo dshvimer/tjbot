@@ -1,14 +1,20 @@
 const Wit = require('node-wit').Wit
+const axios = require('axios')
 
 const faceRec = require('./face-rec')
 const tj = require('./tj')
 const wit = new Wit({
   accessToken: "IXVIMPXYRXN265TMPSSYL3QCHDTDIXON"
 });
+const joke = axios.create({
+    baseURL: 'https://icanhazdadjoke.com/',
+    headers: {'Accept': 'application/json'}
+})
 
 
 
- tj.listen(onRecvText)
+// tj.listen(onRecvText)
+tellJoke()
 //console.log(tj.shineColors())
 
 function onRecvText(words) {
@@ -46,7 +52,7 @@ function shouldSaveFriend(entities) {
 	let intents = entities.intents.map(i => i.value)
 	if (!intents.includes('save_friend'))
 		return false
-	if !entities.contacts.length
+	if (!entities.contacts.length)
 		return false
 	
 	return true
@@ -115,6 +121,11 @@ function attemptToIdentify() {
 			})
 			.catch(onError)
 			});
+}
+
+async function tellJoke() {
+    let res = await joke.get('')
+    console.log(res.data.joke)
 }
 
 function jokeSpider() {
