@@ -7,12 +7,15 @@ const wit = new Wit({
 });
 
 tj.listen(onRecvText)
-console.log(tj.shineColors())
+//console.log(tj.shineColors())
 
 function onRecvText(text) {
 	tj.pulse('white' , 0.7);
     wit.message(text).then(onRecvIntent).catch((err) => err)
-	
+    if (~text.indexOf('beat')) {
+		discoParty();
+		tj.play('./dropbeat.wav');
+	}
 }
 
 function onRecvIntent(data) {
@@ -24,9 +27,20 @@ function onRecvIntent(data) {
 		if (intent.value == 'introduction') {
 			//handleIntroduction(data.entities)
 			tj.pulse('plum' , 0.7);
+		} else if(intent.value == 'plans') {
+			tj.pulse('thistle 4' , 0.7);
+		} else if(intent.value == 'dropBeat') {
+			tj.play('./dropbeat.wav');
 		}
 			
 	}
+}
+
+function discoParty() {
+	let tjColors = tj.shineColors()
+	let timer = setInterval(() => tj.shine(tjColors[Math.floor(Math.random() * tjColors.length)]), 220)
+	setTimeout(() => clearInterval(timer), 8800)
+    
 }
 
 function handleIntroduction(entities) {
@@ -42,7 +56,7 @@ function handleIntroduction(entities) {
 function saveFriend(name) {
 	console.log('otto is remembering your friend... allo')
 	tj.takePhoto().then(filePath => {
-		
+		tj.pulse('orange' , 0.7);
 		faceRec.createSnapshot('./taylor.jpg')
 			.then(res => {
 				let photo = res.url
@@ -60,6 +74,7 @@ function attemptToIdentify() {
 	console.log('identify')
 	tj.takePhoto().then(filePath => {
 		console.log('took photo')
+		tj.pulse('orange' , 0.7);
 		faceRec.createSnapshot(filePath)
 			.then(res => {
 				let photo = res.url

@@ -3,7 +3,7 @@ const TJBot = require('tjbot');
 var hardware = ['led','microphone','camera','speaker'];
 var configuration = {
 	log:	{
-			//level: 'verbose'
+			level: 'info'
 		},
     robot: {
             gender: 'female'
