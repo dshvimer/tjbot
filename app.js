@@ -28,9 +28,9 @@ async function onRecvText(words) {
                 discoParty();
                 tj.play('./dropbeat.wav');
             } else if(text.includes('joke') || text.includes('funny')) {
-                let jokes = [jokeFish, jokeDrive, jokeSpider]
-                let rand = Math.floor(Math.random() * jokes.length)
-                jokes[rand]()
+                await tellJoke()
+            } else if(text.includes('thank')) {
+                tj.speak('no problaymo')
             } else {
                 let intent = await wit.message(text)
                 onRecvIntent(intent)
@@ -45,10 +45,10 @@ async function onRecvText(words) {
 function onRecvIntent(data) {
     console.log('entities', data.entities)
     let intents = data.entities.intent 
-    if (intents.length >= 1) {
+    if (intents && (intents.length >= 1)) {
         let intent = intents[0]
         if (shouldSaveFriend(data.entities)) {
-            let contacts = data.entities.contacts.map(c => c.value)
+            let contacts = data.entities.contact.map(c => c.value)
             saveFriend(contacts[0])
         } else if(intent.value == 'remember_friend') {
             attemptToIdentify()
@@ -57,10 +57,10 @@ function onRecvIntent(data) {
 }
 
 function shouldSaveFriend(entities) {
-    let intents = entities.intents.map(i => i.value)
+    let intents = entities.intent.map(i => i.value)
     if (!intents.includes('save_friend'))
         return false
-    if (!entities.contacts.length)
+    if (!entities.contact.length)
         return false
 
     return true
@@ -90,25 +90,6 @@ async function saveFriend(name) {
     }
 }
 
-// function saveFriend(name) {
-//     tj.pulse('yellow', 0.7)
-//     console.log('otto is remembering your friend... allo')
-//     tj.takePhoto().then(filePath => {
-//         faceRec.createSnapshot(filePath)
-//             .then(res => {
-//                 let photo = res.url
-//                 faceRec.createPerson(name, photo)
-//                     .then(res => {
-//                         console.log(res)
-//                         faceRec.trainPersonGroup()
-//                         tj.pulse('green' , 0.7);
-//                     })
-//                     .catch(onError)
-//             })
-//             .catch(onError)
-//     })
-// }
-
 async function attemptToIdentify() {
     try {
         tj.pulse('orange' , 0.7);
@@ -116,9 +97,9 @@ async function attemptToIdentify() {
         tj.pulse('orange' , 0.7);
         let snap = await faceRec.createSnapshot(filePath)
         tj.pulse('orange' , 0.7);
-        let faces = await faceRec.detectFace(photo)
+        let faces = await faceRec.detectFace(snap.url)
         tj.pulse('orange' , 0.7);
-        let faceIds = res.data.map(item => item.faceId)
+        let faceIds = faces.data.map(item => item.faceId)
         let identify = {    
             personGroupId: "friends",
             faceIds: faceIds,
@@ -140,49 +121,10 @@ async function attemptToIdentify() {
     }
 }
 
-// function attemptToIdentify() {
-//     tj.pulse('thistle 4' , 0.7);
-//     console.log('identify')
-//     tj.takePhoto().then(filePath => {
-//         console.log('took photo')
-//         tj.pulse('orange' , 0.7);
-//         faceRec.createSnapshot(filePath)
-//             .then(res => {
-//                 let photo = res.url
-//                 console.log(photo)
-//                 faceRec.detectFace(photo)
-//                     .then(res => {
-//                         let faceIds = res.data.map(item => item.faceId)
-//                         let identify = {    
-//                             personGroupId: "friends",
-//                             faceIds: faceIds,
-//                             maxNumOfCandidatesReturned: 1,
-//                             confidenceThreshold: 0.5
-//                         }
-//                         faceRec.identify(identify)
-//                             .then(res => {
-//                                 let c = res.data.reduce((acc, item) => acc.concat(item.candidates), [])
-//                                 console.log(c)
-//                                 tj.pulse('green' , 0.7);
-//                                 if (c.length >= 1)
-//                                     faceRec.getPerson(c[0].personId)
-//                                         .then(res => tj.speak(res.data.name))
-//                                         .catch(onError)
-//                                 else
-//                                     tj.speak('who dis?')
-//                             })
-//                             .catch(onError)
-//                     })
-//                     .catch(onError)
-//             })
-//             .catch(onError)
-//     });
-// }
-
 async function tellJoke() {
     try {
         let res = await joke.get('')
-        console.log(res.data.joke)
+        tj.speak(res.data.joke)
     }
     catch(err) {
         onError(err) 
