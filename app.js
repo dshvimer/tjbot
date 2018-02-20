@@ -4,7 +4,7 @@ const axios = require('axios')
 const faceRec = require('./face-rec')
 const tj = require('./tj')
 const wit = new Wit({
-  accessToken: "IXVIMPXYRXN265TMPSSYL3QCHDTDIXON"
+    accessToken: "IXVIMPXYRXN265TMPSSYL3QCHDTDIXON"
 });
 const joke = axios.create({
     baseURL: 'https://icanhazdadjoke.com/',
@@ -12,148 +12,178 @@ const joke = axios.create({
 })
 
 
+try {
+    tj.listen(onRecvText)
+}
+catch(err) {
+    onError(err) 
+}
 
-// tj.listen(onRecvText)
-tellJoke()
-//console.log(tj.shineColors())
-
-function onRecvText(words) {
-	let text = processCommand(words)
-	tj.pulse('white' , 0.7);
+async function onRecvText(words) {
+    let text = processCommand(words)
+    tj.pulse('white' , 0.7);
     if (text.length > 0) {
-		if(text.includes('beat')) {
-			discoParty();
-			tj.play('./dropbeat.wav');
-		} else if(text.includes('joke') || text.includes('funny')) {
-			let jokes = [jokeFish, jokeDrive, jokeSpider]
-			let rand = Math.floor(Math.random() * jokes.length)
-			jokes[rand]()
-		} else {
-			wit.message(text).then(onRecvIntent).catch(onError)
-		}
-	}
+        if(text.includes('beat')) {
+            discoParty();
+            tj.play('./dropbeat.wav');
+        } else if(text.includes('joke') || text.includes('funny')) {
+            let jokes = [jokeFish, jokeDrive, jokeSpider]
+            let rand = Math.floor(Math.random() * jokes.length)
+            jokes[rand]()
+        } else {
+            let intent = await wit.message(text)
+            onRecvIntent(intent)
+        }
+    }
 }
 
 function onRecvIntent(data) {
-	console.log('entities', data.entities)
+    console.log('entities', data.entities)
     let intents = data.entities.intent 
     if (intents.length >= 1) {
-		let intent = intents[0]
-		if (shouldSaveFriend(data.entities)) {
-			let contacts = data.entities.contacts.map(c => c.value)
-			saveFriend(contacts[0])
-		} else if(intent.value == 'remember_friend') {
-			attemptToIdentify()
-		}			
-	}
+        let intent = intents[0]
+        if (shouldSaveFriend(data.entities)) {
+            let contacts = data.entities.contacts.map(c => c.value)
+            saveFriend(contacts[0])
+        } else if(intent.value == 'remember_friend') {
+            attemptToIdentify()
+        }			
+    }
 }
 
 function shouldSaveFriend(entities) {
-	let intents = entities.intents.map(i => i.value)
-	if (!intents.includes('save_friend'))
-		return false
-	if (!entities.contacts.length)
-		return false
-	
-	return true
+    let intents = entities.intents.map(i => i.value)
+    if (!intents.includes('save_friend'))
+        return false
+    if (!entities.contacts.length)
+        return false
+
+    return true
 }
 
 function discoParty() {
-	let tjColors = tj.shineColors()
-	let timer = setInterval(() => tj.shine(tjColors[Math.floor(Math.random() * tjColors.length)]), 220)
-	setTimeout(() => clearInterval(timer), 8800)
-    
+    let tjColors = tj.shineColors()
+    let timer = setInterval(() => tj.shine(tjColors[Math.floor(Math.random() * tjColors.length)]), 220)
+    setTimeout(() => clearInterval(timer), 8800)
+
 }
 
-function saveFriend(name) {
-	tj.pulse('yellow', 0.7)
-	console.log('otto is remembering your friend... allo')
-	tj.takePhoto().then(filePath => {
-		faceRec.createSnapshot(filePath)
-			.then(res => {
-				let photo = res.url
-				faceRec.createPerson(name, photo)
-					.then(res => {
-						console.log(res)
-						faceRec.trainPersonGroup()
-						tj.pulse('green' , 0.7);
-					})
-					.catch(onError)
-			})
-			.catch(onError)
-	})
+async function saveFriend(name) {
+    tj.pulse('yellow', 0.7)
+    let photo = await tj.takePhoto()
+    tj.pulse('yellow', 0.7)
+    let snap = await faceRec.createSnapshot(photo)
+    tj.pulse('yellow', 0.7)
+    let person = await faceRec.createPerson(name, snap.url)
+    tj.pulse('yellow', 0.7)
+    await faceRec.trainPersonGroup()
+    tj.pulse('green', 0.7)
 }
 
-function attemptToIdentify() {
-	tj.pulse('thistle 4' , 0.7);
-	console.log('identify')
-	tj.takePhoto().then(filePath => {
-		console.log('took photo')
-		tj.pulse('orange' , 0.7);
-		faceRec.createSnapshot(filePath)
-			.then(res => {
-				let photo = res.url
-				console.log(photo)
-				faceRec.detectFace(photo)
-					.then(res => {
-						let faceIds = res.data.map(item => item.faceId)
-						let identify = {    
-							personGroupId: "friends",
-							faceIds: faceIds,
-							maxNumOfCandidatesReturned: 1,
-							confidenceThreshold: 0.5
-						}
-						faceRec.identify(identify)
-							.then(res => {
-								let c = res.data.reduce((acc, item) => acc.concat(item.candidates), [])
-								console.log(c)
-								tj.pulse('green' , 0.7);
-								if (c.length >= 1)
-									faceRec.getPerson(c[0].personId)
-										.then(res => tj.speak(res.data.name))
-										.catch(onError)
-								else
-									tj.speak('who dis?')
-							})
-							.catch(onError)
-							})
-							.catch(onError)
-			})
-			.catch(onError)
-			});
+// function saveFriend(name) {
+//     tj.pulse('yellow', 0.7)
+//     console.log('otto is remembering your friend... allo')
+//     tj.takePhoto().then(filePath => {
+//         faceRec.createSnapshot(filePath)
+//             .then(res => {
+//                 let photo = res.url
+//                 faceRec.createPerson(name, photo)
+//                     .then(res => {
+//                         console.log(res)
+//                         faceRec.trainPersonGroup()
+//                         tj.pulse('green' , 0.7);
+//                     })
+//                     .catch(onError)
+//             })
+//             .catch(onError)
+//     })
+// }
+
+async function attemptToIdentify() {
+    tj.pulse('orange' , 0.7);
+    let filePath = await tj.takePhoto()
+    tj.pulse('orange' , 0.7);
+    let snap = await faceRec.createSnapshot(filePath)
+    tj.pulse('orange' , 0.7);
+    let faces = await faceRec.detectFace(photo)
+    tj.pulse('orange' , 0.7);
+    let faceIds = res.data.map(item => item.faceId)
+    let identify = {    
+        personGroupId: "friends",
+        faceIds: faceIds,
+        maxNumOfCandidatesReturned: 1,
+        confidenceThreshold: 0.5
+    }
+    let res = await faceRec.identify(identify)
+    let c = res.data.reduce((acc, item) => acc.concat(item.candidates), [])
+    if (c.length >= 1) {
+        let person = await faceRec.getPerson(c[0].personId)
+        tj.pulse('green' , 0.7);
+        tj.speak(person.data.name)
+    }
+    else
+        tj.speak('who dis?')
 }
+
+// function attemptToIdentify() {
+//     tj.pulse('thistle 4' , 0.7);
+//     console.log('identify')
+//     tj.takePhoto().then(filePath => {
+//         console.log('took photo')
+//         tj.pulse('orange' , 0.7);
+//         faceRec.createSnapshot(filePath)
+//             .then(res => {
+//                 let photo = res.url
+//                 console.log(photo)
+//                 faceRec.detectFace(photo)
+//                     .then(res => {
+//                         let faceIds = res.data.map(item => item.faceId)
+//                         let identify = {    
+//                             personGroupId: "friends",
+//                             faceIds: faceIds,
+//                             maxNumOfCandidatesReturned: 1,
+//                             confidenceThreshold: 0.5
+//                         }
+//                         faceRec.identify(identify)
+//                             .then(res => {
+//                                 let c = res.data.reduce((acc, item) => acc.concat(item.candidates), [])
+//                                 console.log(c)
+//                                 tj.pulse('green' , 0.7);
+//                                 if (c.length >= 1)
+//                                     faceRec.getPerson(c[0].personId)
+//                                         .then(res => tj.speak(res.data.name))
+//                                         .catch(onError)
+//                                 else
+//                                     tj.speak('who dis?')
+//                             })
+//                             .catch(onError)
+//                     })
+//                     .catch(onError)
+//             })
+//             .catch(onError)
+//     });
+// }
 
 async function tellJoke() {
     let res = await joke.get('')
     console.log(res.data.joke)
 }
 
-function jokeSpider() {
-    tj.speak('Two spiders got engaged').then(() => tj.speak('I heard they met on the web'))
-}
-
-function jokeDrive() {
-	tj.speak('Why was the computer late to work').then(() => tj.speak('It had a hard drive'))
-}
-function jokeFish() {
-	tj.speak('Give a man a fish, and he’ll Instagram it.').then(() => tj.speak('Teach a man to fish, and he’ll still Instagram it.'))
-}
-
 function mentionedOtto(text) {
-	return /auto|otto|although/i.test(text)
+    return /auto|otto|although/i.test(text)
 }
 
 function processCommand(words) {
-	let text = words.toLowerCase().trim()
-	if (mentionedOtto(text))
-		text = text.replace(/auto|otto|although/i, '')
-	else
-		text = ""
-		
-	return text
+    let text = words.toLowerCase().trim()
+    if (mentionedOtto(text))
+        text = text.replace(/auto|otto|although/i, '')
+    else
+        text = ""
+
+    return text
 }
 
 function onError(err) {
-	console.log(err)
-	tj.pulse('red', 0.7)
+    console.log(err)
+    tj.pulse('red', 0.7)
 }
