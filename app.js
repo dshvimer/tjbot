@@ -13,6 +13,7 @@ const joke = axios.create({
 
 
 try {
+    tj.pulse('blue')
     tj.listen(onRecvText)
 }
 catch(err) {
