@@ -19,6 +19,10 @@
   "homepage": "https://github.com/dshvimer/tjbot#readme",
   "dependencies": {
     "axios": "^0.17.1",
+    "google-auth-library": "^1.3.1",
+    "googleapis": "^26.0.1",
+    "mime": "^2.2.0",
+    "node-google-calendar": "^1.1.1",
     "node-wit": "^5.0.0",
     "readline-sync": "^1.4.9",
     "tjbot": "^1.3.0"

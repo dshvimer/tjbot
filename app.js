@@ -1,6 +1,7 @@
 const Wit = require('node-wit').Wit
 const axios = require('axios')
 
+const createEvent = require('./calendar')
 const faceRec = require('./face-rec')
 const tj = require('./tj')
 const wit = new Wit({
@@ -13,8 +14,9 @@ const joke = axios.create({
 
 
 try {
-    tj.pulse('blue')
-    tj.listen(onRecvText)
+    // tj.pulse('blue')
+    // tj.listen(onRecvText)
+    createCalEvent()
 }
 catch(err) {
     onError(err) 
@@ -34,7 +36,7 @@ async function onRecvText(words) {
                 tj.speak('no problaymo')
             } else {
                 let intent = await wit.message(text)
-                onRecvIntent(intent)
+                onRecvIntent(intent, text)
             }
         }
     }
@@ -43,7 +45,7 @@ async function onRecvText(words) {
     }
 }
 
-function onRecvIntent(data) {
+function onRecvIntent(data, text) {
     console.log('entities', data.entities)
     let intents = data.entities.intent 
     if (intents && (intents.length >= 1)) {
@@ -53,6 +55,8 @@ function onRecvIntent(data) {
             saveFriend(contacts[0])
         } else if(intent.value == 'remember_friend') {
             attemptToIdentify()
+        } else if(intent.value == 'plans') {
+            createCalEvent(data.entities, text)
         }			
     }
 }
@@ -149,4 +153,31 @@ function processCommand(words) {
 function onError(err) {
     console.log(err)
     tj.pulse('red', 0.7)
+}
+
+async function createCalEvent(entities, text) {
+    let location = ''
+    let contact = ''
+
+    if (entities.contact)
+        contact = entities.contact.map(con => con.value)[0]
+
+    if (entities.location)
+        location = entities.location.map(loc => loc.value)[0]
+
+    if (entities.datetime) {
+        let date = entities.datetime.map(date => date.value)[0]
+        let start = new Date(date)
+        let end = new Date(start.getTime() + 120000);
+        let event = {
+            'start': { 'dateTime': start },
+            'end': { 'dateTime': end },
+            'location': location,
+            'summary': contact || 'Plans made by Otto',
+            'description': text,
+            'status': 'confirmed',
+            'colorId': 1
+        }
+        createEvent(event)
+    }
 }
