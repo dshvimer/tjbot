@@ -4,7 +4,7 @@ const axios = require('axios')
 class FaceRec {
     constructor() {
         this.MSFT_URL = 'https://westcentralus.api.cognitive.microsoft.com/face/v1.0'
-        this.API_URL = 'http://10.0.0.48:3000'
+        this.API_URL = 'https://floating-basin-35267.herokuapp.com'
         this.personGroupId = 'friends'
         this.msft = axios.create({
           baseURL: this.MSFT_URL,
