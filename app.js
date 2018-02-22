@@ -14,9 +14,8 @@ const joke = axios.create({
 
 
 try {
-    // tj.pulse('blue')
-    // tj.listen(onRecvText)
-    createCalEvent()
+    tj.pulse('blue')
+    tj.listen(onRecvText)
 }
 catch(err) {
     onError(err) 
@@ -155,7 +154,7 @@ function onError(err) {
     tj.pulse('red', 0.7)
 }
 
-async function createCalEvent(entities, text) {
+function createCalEvent(entities, text) {
     let location = ''
     let contact = ''
 
